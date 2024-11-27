@@ -1,0 +1,67 @@
+//Queue using Array
+#include <iostream>
+using namespace std;
+class Queue{
+private:
+int* arr;
+int front, rear,
+maxSize;
+public:
+
+Queue(int size){
+arr = new int[size];
+maxSize = size;
+front = -1;
+rear = -1;
+}
+
+~Queue(){
+delete[] arr;
+}
+
+
+void enqueue(int value){
+if (rear >= maxSize - 1){
+cout << "Queue overflow" << endl;
+return;
+}
+if (front == -1) front = 0;
+arr[++rear] = value;
+}
+
+
+int dequeue(){
+if (front == -1 || front > rear){
+cout << "Queue underflow" << endl;
+return -1;
+}
+return arr[front++];
+}
+
+
+int peek(){
+if (front == -1 || front > rear){
+cout << "Queue is empty" << endl;
+return -1;
+}
+return arr[front];
+}
+
+bool isEmpty(){
+return front == -1 || front > rear;
+}
+};
+
+int main(){
+Queue queue(5);
+queue.enqueue(10);
+queue.enqueue(20);
+queue.enqueue(30);
+cout << "Front element: " << queue.peek() << endl;
+cout << "Queue elements: ";
+while (!queue.isEmpty()){
+cout << queue.dequeue() << " ";
+}
+cout << endl;
+return 0;
+}
