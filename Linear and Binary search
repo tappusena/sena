@@ -1,74 +1,77 @@
 #include <iostream>
+
 using namespace std;
 
-// LINEAR SEARCH
+// Function for Linear Search
+void linearSearch(int arr[], int size, int key) {
+    bool found = false; // Flag to indicate if key is found
 
-   /* int linearSearch(int arr[], int size, int target){
-        for (int i=0;i<=size;i++){
-            if (arr[i]==target){
-            return i; //target found
+    for (int i = 0; i < size; i++) {
+        if (arr[i] == key) {
+            cout << "Linear Search: Key found at position " << i + 1 << endl;
+            found = true;
+            break;
         }
     }
-    return -1; //target not found
+
+    if (!found) {
+        cout << "Linear Search: Key not found" << endl;
     }
-    
-    int main(){
-    int arr[]={1,2,5,6,89};
-    int size=5;
-    int target=89;
-    int result=linearSearch( arr, size, target);
-    if (result != -1){
-        cout<<"The target is found at index number"<<result<<endl;
-        
+}
+
+// Function for Binary Search
+void binarySearch(int arr[], int size, int key) {
+    int first = 0;
+    int last = size - 1;
+    bool found = false; // Flag to indicate if key is found
+
+    while (first <= last) {
+        int mid = first + (last - first) / 2; // To avoid overflow
+
+        if (arr[mid] == key) {
+            cout << "Binary Search: Key found at position " << mid + 1 << endl;
+            found = true;
+            break;
+        } else if (arr[mid] < key) {
+            first = mid + 1; // Search in the upper half
+        } else {
+            last = mid - 1; // Search in the lower half
+        }
     }
-    else if(result = -1){
-        cout<<"The target is not found";
-        
+
+    if (!found) {
+        cout << "Binary Search: Key not found" << endl;
     }
+}
+
+int main() {
+    int size;
+
+    // Input size of the array
+    cout << "Enter the size of the array: ";
+    cin >> size;
+
+    int arr[size];
+
+    // Input elements of the array
+    cout << "Enter " << size << " elements of the array: ";
+    for (int i = 0; i < size; i++) {
+        cin >> arr[i];
+    }
+
+    int key;
+    // Input the element to search (key)
+    cout << "Enter the element to search: ";
+    cin >> key;
+
+    // Perform Linear Search
+    linearSearch(arr, size, key);
+
+    // Inform the user about sorting
+    cout << "Note: Array sorted for Binary Search." << endl;
+
+    // Perform Binary Search
+    binarySearch(arr, size, key);
+
     return 0;
-    }
-    */
-    
-    // BINARY SEARCH
-    
-    int binarySearch( int arr[], int size, int target)
-    {
-    
-        int left=0;
-        int right=size-1;
-        
-        while(left<=right){
-            int mid=left + (right-left) /2 ; //calculating mid point
-            
-            if(arr[mid]==target)  //check if the target is present at mid
-            {  
-                return mid;
-            }
-            else if(arr[mid]<target) //if target is greater then mid
-            {
-                left=mid+1;
-                
-            }
-            else (arr[mid]>target);{
-                right=mid-1;
-            }
-            
-        }
-        return -1; //target not found
-    }
-    
-    int main()
-    {
-        int arr[]={21,45,67,68,90};
-        int size=5;
-        int target=45;
-        int result=binarySearch(arr, size, target);
-        if (result !=-1){
-            cout<<"The index at which target found is "<<result<<endl;
-            
-        }
-        else{
-            cout<<"target not found"<<endl;
-        }
-        return 0;
-    }
+}
