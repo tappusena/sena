@@ -1,0 +1,137 @@
+//Binary Search Tree
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+
+    Node(int value) {
+        data = value;
+        left = right = nullptr;
+    }
+};
+
+class BST {
+public:
+    Node* root;
+
+    BST() {
+        root = nullptr;
+    }
+
+    Node* insert(Node* node, int value) {
+        if (node == nullptr) {
+            return new Node(value);
+        }
+        if (value < node->data) {
+            node->left = insert(node->left, value);
+        } else if (value > node->data) {
+            node->right = insert(node->right, value);
+        }
+        return node;
+    }
+
+    bool search(Node* node, int value) {
+        if (node == nullptr) {
+            return false;
+        }
+        if (node->data == value) {
+            return true;
+        }
+        if (value < node->data) {
+            return search(node->left, value);
+        } else {
+            return search(node->right, value);
+        }
+    }
+
+    void inOrder(Node* node) {
+        if (node != nullptr) {
+            inOrder(node->left);
+            cout << node->data << " ";
+            inOrder(node->right);
+        }
+    }
+
+    void preOrder(Node* node) {
+        if (node != nullptr) {
+            cout << node->data << " ";
+            preOrder(node->left);
+            preOrder(node->right);
+        }
+    }
+
+    void postOrder(Node* node) {
+        if (node != nullptr) {
+            postOrder(node->left);
+            postOrder(node->right);
+            cout << node->data << " ";
+        }
+    }
+};
+
+int main() {
+    BST tree;
+    int choice, value;
+
+    do {
+        cout << "\nBinary Search Tree Menu:\n";
+        cout << "1. Insert\n";
+        cout << "2. Search\n";
+        cout << "3. In-order Traversal\n";
+        cout << "4. Pre-order Traversal\n";
+        cout << "5. Post-order Traversal\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "Enter the value to insert: ";
+            cin >> value;
+            tree.root = tree.insert(tree.root, value);
+            cout << value << " inserted into the tree.\n";
+            break;
+
+        case 2:
+            cout << "Enter the value to search: ";
+            cin >> value;
+            if (tree.search(tree.root, value)) {
+                cout << value << " is present in the tree.\n";
+            } else {
+                cout << value << " is not present in the tree.\n";
+            }
+            break;
+
+        case 3:
+            cout << "In-order traversal of the tree: ";
+            tree.inOrder(tree.root);
+            cout << endl;
+            break;
+
+        case 4:
+            cout << "Pre-order traversal of the tree: ";
+            tree.preOrder(tree.root);
+            cout << endl;
+            break;
+
+        case 5:
+            cout << "Post-order traversal of the tree: ";
+            tree.postOrder(tree.root);
+            cout << endl;
+            break;
+
+        case 6:
+            cout << "Exiting program.\n";
+            break;
+
+        default:
+            cout << "Invalid choice! Please try again.\n";
+            break;
+        }
+    } while (choice != 6);
+
+    return 0;
+}
