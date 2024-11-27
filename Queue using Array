@@ -1,3 +1,33 @@
+//Algorithm
+/*1. Enqueue Operation:
+   1. Start.
+   2. Check if the queue is full (rear == size - 1).
+      - If full, print "Queue Overflow" and exit.
+   3. If the queue is not full:
+      - Increment the rear index.
+      - Insert the new element at `queue[rear]`.
+   4. If the front index is -1, set front to 0.
+   5. End.
+
+ 2. Dequeue Operation:
+   1. Start.
+   2. Check if the queue is empty (front == -1 or front > rear).
+      - If empty, print "Queue is empty" and exit.
+   3. If the queue is not empty:
+      - Remove the element from `queue[front]`.
+      - Increment the front index.
+      - If front exceeds rear, reset front and rear to -1 (queue becomes empty).
+   4. End.
+
+ 3. Display Operation:
+   1. Start.
+   2. Check if the queue is empty (front == -1).
+      - If empty, print "Queue is empty" and exit.
+   3. If not empty:
+      - Traverse the queue from `queue[front]` to `queue[rear]` and display each element.
+   4. End.
+*/
+
 class Queue
 {
 public:
