@@ -1,3 +1,80 @@
+//Algorithm
+/*1. Algorithm for Creating a Node:
+●	Start by creating a new element to store the given value.
+●	Set the new element’s value to the provided input.
+●	Set the pointer of the new element to indicate it is the last in the sequence.
+●	If the sequence is empty:
+o	Make this new element the first and last element in the sequence.
+●	Else:
+o	Link the last element in the sequence to the new element.
+o	Update the reference to the last element to this new element.
+●	End the process.
+2. Algorithm for Displaying the Sequence:
+●	Start by setting a reference to the first element in the sequence.
+●	If the sequence is empty:
+o	Display a message indicating the sequence is empty.
+●	Else:
+o	While the end of the sequence has not been reached:
+▪	Display the value of the current element.
+▪	Move to the next element in the sequence.
+●	End the process.
+3. Algorithm for Inserting at the Front:
+●	Start by creating a new element to store the given value.
+●	Set the new element’s value to the provided input.
+●	Link the new element to the current first element in the sequence.
+●	Update the reference to the first element to this new element.
+●	End the process.
+ 
+4. Algorithm for Inserting at the Rear:
+●	Start by creating a new element to store the given value.
+●	Set the new element’s value to the provided input.
+●	Set the pointer of the new element to indicate it is the last in the sequence.
+●	If the sequence is empty:
+o	Make this new element the first element in the sequence.
+●	Else:
+o	Traverse the sequence to find the last element.
+o	Link the last element to the new element.
+●	End the process.
+ 
+5. Algorithm for Inserting After a Specified Position:
+●	Start by creating a new element to store the given value.
+●	Set the new element’s value to the provided input.
+●	Traverse the sequence to reach the specified position.
+●	Link the new element to the element following the specified position.
+●	Link the specified position element to the new element.
+●	End the process.
+ 
+6. Algorithm for Deleting the First Element:
+●	Start by referencing the first element in the sequence.
+●	If the sequence is empty:
+o	There is nothing to delete.
+●	Else:
+o	Update the reference to the first element to the next element in the sequence.
+o	Remove the original first element.
+o	Display a message indicating the deletion was successful.
+●	End the process.
+ 
+7. Algorithm for Deleting the Last Element:
+●	Start by referencing the first element and initializing a second reference.
+●	If the sequence is empty:
+o	There is nothing to delete.
+●	Else:
+o	Traverse the sequence to reach the last element.
+o	Update the pointer of the second-to-last element to indicate it is now the last.
+o	Display the value of the deleted element.
+o	Remove the last element.
+●	End the process.
+ 
+8. Algorithm for Deleting After a Specified Position:
+●	Start by referencing the first element and initializing a second reference.
+●	Traverse the sequence to reach the specified position.
+●	If there is no element following the specified position:
+o	There is nothing to delete.
+●	Else:
+o	Link the specified position element to the element after the one to be deleted.
+o	Remove the element after the specified position.
+●	End the process.
+*/
 #include <iostream>
 using namespace std;
 
