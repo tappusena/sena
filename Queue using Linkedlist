@@ -1,0 +1,101 @@
+struct Node {
+    int data;
+    Node* next;
+};
+
+class Queue {
+    Node* front; // Pointer to the front of the queue
+    Node* rear;  // Pointer to the rear of the queue
+
+public:
+    Queue() {
+        front = NULL;
+        rear = NULL;
+    }
+
+    // Enqueue operation
+    void enqueue(int value) {
+        Node* newNode = new Node(); // Step 2: Create a new node
+        newNode->data = value;      // Step 3: Insert data into the node
+        newNode->next = NULL;       // Initialize the next pointer to NULL
+
+        if (front == NULL) {        // Step 4: Check if the queue is empty
+            front = newNode;        // Set front and rear to the new node
+            rear = newNode;
+        } else {
+            rear->next = newNode;  // Step 5: Attach new node to rear's next
+            rear = newNode;        // Update rear to the new node
+        }
+        cout << value << " enqueued to the queue." << endl;
+    }
+
+    // Dequeue operation
+    void dequeue() {
+        if (front == NULL) {        // Step 2: Check if the queue is empty
+            cout << "Queue is empty." << endl;
+            return;
+        }
+
+        Node* temp = front;         // Step 3: Remove the front element
+        cout << temp->data << " dequeued from the queue." << endl;
+        front = front->next;       // Move front to the next node
+
+        if (front == NULL) {       // If the queue becomes empty
+            rear = NULL;
+        }
+
+        delete temp;               // Step 4: Free memory of the dequeued node
+    }
+
+    // Display operation
+    void display() {
+        if (front == NULL) {        // Step 2: Check if the queue is empty
+            cout << "Queue is empty." << endl;
+            return;
+        }
+
+        Node* current = front;      // Step 3: Traverse and print elements
+        cout << "Queue contents: ";
+        while (current != NULL) {
+            cout << current->data << " ";
+            current = current->next;
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    Queue queue;
+    int choice, value;
+
+    do {
+        cout << "\nMenu:" << endl;
+        cout << "1. Enqueue" << endl;
+        cout << "2. Dequeue" << endl;
+        cout << "3. Display" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "Enter the value to enqueue: ";
+            cin >> value;
+            queue.enqueue(value);
+            break;
+        case 2:
+            queue.dequeue();
+            break;
+        case 3:
+            queue.display();
+            break;
+        case 4:
+            cout << "Exiting the program." << endl;
+            break;
+        default:
+            cout << "Invalid choice! Please try again." << endl;
+        }
+    } while (choice != 4);
+
+    return 0;
+}
