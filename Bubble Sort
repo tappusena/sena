@@ -1,3 +1,26 @@
+//Algorithm
+//1.	Repeat the following steps until no swaps are needed:
+//●	Start from the first element and compare it with the next one.
+//●	If the current element is larger than the next, swap them.
+//2.	Continue this process for each element in the list, moving from the start to the end.
+//3.	With each pass through the list, the largest unsorted element moves to its correct position at the end, gradually sorting the entire list.
+//1.	Start
+//2.	Input the size of the array n.
+//3.	Input the elements of the array:
+//o	For i = 0 to n-1, input arr[i].
+//4.	Begin Bubble Sort:
+//o	For i = n-1 down to 1:
+//▪	For j = 0 to i-1:
+//▪	If arr[j] > arr[j+1], then:
+//▪	Swap arr[j] and arr[j+1]:
+//▪	Temporarily store arr[j] in temp.
+//▪	Set arr[j] to arr[j+1].
+//▪	Set arr[j+1] to temp.
+//5.	End Bubble Sort
+//6.	Display the sorted array:
+//o	For i = 0 to n-1, print arr[i].
+//7.	End
+
 //Bubble Sort
 #include <iostream>
 using namespace std;
