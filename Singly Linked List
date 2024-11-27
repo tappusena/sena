@@ -1,0 +1,251 @@
+#include <iostream>
+using namespace std;
+
+struct Node
+{
+    int value;
+    Node *nextNode;
+};
+
+class SinglyLinkedList
+{
+private:
+    Node *firstNode, *lastNode;
+
+public:
+    SinglyLinkedList()
+    {
+        firstNode = NULL;
+        lastNode = NULL;
+    }
+
+    void addNode(int data)
+    {
+        Node *newNode = new Node;
+        newNode->value = data;
+        newNode->nextNode = NULL;
+
+        if (firstNode == NULL)
+        {
+            firstNode = newNode;
+            lastNode = newNode;
+        }
+        else
+        {
+            lastNode->nextNode = newNode;
+            lastNode = newNode;
+        }
+    }
+
+    void insertFront(int data)
+    {
+        Node *newNode = new Node;
+        newNode->value = data;
+        newNode->nextNode = firstNode;
+        firstNode = newNode;
+    }
+
+    void insertEnd(int data)
+    {
+        Node *newNode = new Node;
+        newNode->value = data;
+        newNode->nextNode = NULL;
+
+        if (firstNode == NULL)
+        {
+            firstNode = newNode;
+            lastNode = newNode;
+        }
+        else
+        {
+            Node *currentNode = firstNode;
+            while (currentNode->nextNode != NULL)
+            {
+                currentNode = currentNode->nextNode;
+            }
+            currentNode->nextNode = newNode;
+            lastNode = newNode;
+        }
+    }
+
+    void insertAtPosition(int data, int position)
+    {
+        Node *newNode = new Node;
+        newNode->value = data;
+
+        if (position == 0)
+        {
+            newNode->nextNode = firstNode;
+            firstNode = newNode;
+            return;
+        }
+
+        Node *currentNode = firstNode;
+        for (int i = 1; i < position; i++)
+        {
+            if (currentNode->nextNode == NULL)
+            {
+                cout << "Position out of bounds" << endl;
+                return;
+            }
+            currentNode = currentNode->nextNode;
+        }
+
+        newNode->nextNode = currentNode->nextNode;
+        currentNode->nextNode = newNode;
+    }
+
+    void deleteFirst()
+    {
+        if (firstNode == NULL)
+        {
+            cout << "List is empty, nothing to delete" << endl;
+            return;
+        }
+        Node *tempNode = firstNode;
+        firstNode = firstNode->nextNode;
+        delete tempNode;
+    }
+
+    void deleteLast()
+    {
+        if (firstNode == NULL)
+        {
+            cout << "List is empty, nothing to delete" << endl;
+            return;
+        }
+        if (firstNode->nextNode == NULL)
+        {
+            delete firstNode;
+            firstNode = NULL;
+            lastNode = NULL;
+            return;
+        }
+        Node *currentNode = firstNode;
+        while (currentNode->nextNode->nextNode != NULL)
+        {
+            currentNode = currentNode->nextNode;
+        }
+        delete currentNode->nextNode;
+        currentNode->nextNode = NULL;
+        lastNode = currentNode;
+    }
+
+    void deleteAtPosition(int position)
+    {
+        if (firstNode == NULL)
+        {
+            cout << "List is empty, nothing to delete" << endl;
+            return;
+        }
+        if (position == 0)
+        {
+            deleteFirst();
+            return;
+        }
+        Node *currentNode = firstNode;
+        for (int i = 1; i < position; i++)
+        {
+            if (currentNode->nextNode == NULL)
+            {
+                cout << "Position out of bounds" << endl;
+                return;
+            }
+            currentNode = currentNode->nextNode;
+        }
+        Node *tempNode = currentNode->nextNode;
+        if (tempNode == NULL)
+        {
+            cout << "Position out of bounds" << endl;
+            return;
+        }
+        currentNode->nextNode = tempNode->nextNode;
+        delete tempNode;
+    }
+
+    void displayList()
+    {
+        Node *tempNode = firstNode;
+        if (tempNode == NULL)
+        {
+            cout << "List is empty" << endl;
+            return;
+        }
+        while (tempNode != NULL)
+        {
+            cout << tempNode->value << " ";
+            tempNode = tempNode->nextNode;
+        }
+        cout << endl;
+    }
+};
+
+int main()
+{
+    SinglyLinkedList list;
+    int option, data, position;
+
+    while (1)
+    {
+        cout << endl << "Please choose the operation to be performed\n";
+        cout << "1. Add node at front\n";
+        cout << "2. Add node at end\n";
+        cout << "3. Add node at specific position\n";
+        cout << "4. Delete node from start\n";
+        cout << "5. Delete node from end\n";
+        cout << "6. Delete node from specific position\n";
+        cout << "7. Display list\n";
+        cout << "8. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> option;
+
+        switch (option)
+        {
+        case 1:
+            cout << "Enter the value to be added at the front: ";
+            cin >> data;
+            list.insertFront(data);
+            break;
+
+        case 2:
+            cout << "Enter the value to be added at the end: ";
+            cin >> data;
+            list.insertEnd(data);
+            break;
+
+        case 3:
+            cout << "Enter the value to be added: ";
+            cin >> data;
+            cout << "Enter the position: ";
+            cin >> position;
+            list.insertAtPosition(data, position);
+            break;
+
+        case 4:
+            list.deleteFirst();
+            break;
+
+        case 5:
+            list.deleteLast();
+            break;
+
+        case 6:
+            cout << "Enter the position: ";
+            cin >> position;
+            list.deleteAtPosition(position);
+            break;
+
+        case 7:
+            list.displayList();
+            break;
+
+        case 8:
+            exit(0);
+
+        default:
+            cout << "Invalid choice" << endl;
+        }
+    }
+
+    return 0;
+}
