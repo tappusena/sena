@@ -1,3 +1,35 @@
+//Algorithm
+/*1. Enqueue Operation:
+   1. Start.
+   2. Create a new node.
+   3. Insert the data into the node.
+   4. If the queue is empty (i.e., head is NULL):
+      - Set both head and tail to the new node.
+   5. Otherwise:
+      - Attach the new node to the `next` of the tail.
+      - Update the tail to point to the new node.
+   6. End.
+
+2. Dequeue Operation:
+   1. Start.
+   2. If the queue is empty (i.e., head is NULL):
+      - Print "Queue is empty".
+   3. Otherwise:
+      - Remove the element from the front (head).
+      - Move the head to the next node.
+   4. Free the memory of the dequeued node.
+   5. End.
+
+
+3. Display Operation:
+   1. Start.
+   2. If the queue is empty (i.e., head is NULL):
+      - Print "Queue is empty".
+   3. Otherwise:
+      - Traverse from head to tail and print each element.
+   4. End.
+*/
+
 struct Node {
     int data;
     Node* next;
