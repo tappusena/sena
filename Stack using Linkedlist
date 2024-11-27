@@ -1,0 +1,78 @@
+struct Node
+{
+   int data;
+   Node *next;
+}*top=NULL;
+
+class Stack_LL{
+    public:
+    void push(int num){
+        Node *temp=new Node();
+        temp->data=num;
+        if (top==NULL){
+            //Stack is empty
+            temp->next=NULL;
+        }
+        else{
+            temp->next=top;
+        }
+        top=temp;
+    }
+    void pop(){
+        if (top==NULL){
+            cout<<"Stack is empty"<<endl;
+        }
+        else{
+            Node *temp=top;
+            cout<<"Deleting "<<temp->data<<endl;
+            top=temp->next;
+            delete temp;
+        }
+    }
+    void display(){
+        Node *temp=top;
+        if (temp==NULL){
+            cout<<"Stack is empty"<<endl;
+        }
+        else{
+            while(temp!=NULL){
+                cout<<temp->data<<" ";
+                temp=temp->next;
+            }
+            cout<<endl;
+        }
+    }
+};
+int main()
+{
+    Stack_LL a;
+  
+
+    while (1)
+    {
+
+        int choice;
+        cout << "\nMenu\n1.Push\n2.Pop\n3.Display\n4.Exiting\n";
+        cout << "Enter your choice:: ";
+        cin >> choice;
+
+        switch (choice)
+        {
+
+        case 1:
+            int ele;
+            cout << "Enter the element ::";
+            cin >> ele;
+            a.push(ele);
+            break;
+        case 2:
+            a.pop();
+            break;
+        case 3:
+            a.display();
+            break;
+        case 4:
+            exit(0);
+        }
+    }
+}
