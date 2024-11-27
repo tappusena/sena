@@ -1,3 +1,41 @@
+//Algorithm
+//Linear Search:
+
+//1. Start
+//2. Initialize the array and the size of the array.
+//3. Input the element to search (key).
+//4. Initialize a flag to indicate whether the key is found or not.
+//5. Iterate through each element of the array from the first element to the last:
+  // - Compare the current element with the key.
+  // - If the current element matches the key:
+   //  - Output the position of the key.
+   //  - Set the flag to indicate the key is found.
+   //  - Exit the loop.
+//6. If the key is not found (flag remains unchanged):
+   //- Output "key not found".
+//7. End
+
+ //Binary Search:
+
+//1. Start
+//2. Initialize the array, the size of the array, and the search range (first and last indices).
+//3. Input the element to search (key).
+//4. Initialize a flag to indicate whether the key is found or not.
+//5. While the search range is valid (first index is less than or equal to the last index):
+  // - Calculate the middle index of the current search range.
+  //- Compare the middle element with the key:
+    //- If the middle element matches the key:
+     // - Output the position of the key.
+      // - Set the flag to indicate the key is found.
+      // - Exit the loop.
+    // - If the key is greater than the middle element:
+       //- Update the search range to the upper half (set first index to mid + 1).
+     //- If the key is less than the middle element:
+       //- Update the search range to the lower half (set last index to mid - 1).
+//6. If the key is not found (flag remains unchanged):
+  // - Output "key not found".
+//7. End
+
 #include <iostream>
 
 using namespace std;
