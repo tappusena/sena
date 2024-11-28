@@ -29,7 +29,8 @@
       - Traverse from head to tail and print each element.
    4. End.
 */
-
+#include <iostream>
+using namespace std;
 struct Node {
     int data;
     Node* next;
