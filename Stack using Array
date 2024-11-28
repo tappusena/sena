@@ -25,6 +25,8 @@
       - Traverse the stack from `stack[top]` to `stack[0]` and display each element.
    4. End.
 */
+#inclue <iostream>
+using namespace std;
 struct Stack
 {
     
