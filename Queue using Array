@@ -28,6 +28,9 @@
    4. End.
 */
 
+#include <iostrean>
+using namespace std;
+
 class Queue
 {
 public:
