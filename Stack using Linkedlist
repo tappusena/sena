@@ -25,6 +25,9 @@
       - Traverse the stack from the top to the bottom and print each element.
    4. End.
 */
+
+#include <iostream>
+using namespace std;
 struct Node
 {
    int data;
