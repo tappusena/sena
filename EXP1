@@ -1,0 +1,142 @@
+1.6.1 Algorithm
+1. Start
+2. Select the register Bank 1
+3. Get the first BCD number in register R0 of register bank 1
+4. Get the second BCD number in register R1 of register bank 1
+5. Get number in Accumulator from register R0
+6. Add the two numbers (A + R0)
+7. Convert the result to valid BCD number and store it in Accumula-
+tor
+8. Stop.
+
+;EXP 1A: To add two 8-bit BCD numbers.
+
+org 0000H
+    setb rs0
+    clr rs1      ;Selection of Bank1
+    Mov R0,#10H  ;First data in R0
+    Mov R1,#10H  ;First data in R1
+    Mov A,R0     ;First data in Accumulator
+    add A,R1     ;Addition
+    DA A         ;Covert to BCD
+ end
+
+1.7.1 Algorithm
+1. Start
+2. Select the register Bank 1
+3. Initialize R1 as a pointer with source address.
+4. Initialize R0 register with count.
+5. Add data byte by byte.
+6. Check for carry, If carry is present increment register R3 by 1.
+7. Increment source address/pointer.
+8. Decrement counter.
+9. Check for count, if not zero go to step 5 else continue
+10. Store the result of addition.
+11. Stop.
+
+;EXP 1B: To add Block of data assuming the sum to be 16 bit.
+
+ORG 0000H
+	SETB RS0      ; Select Register Bank 1  
+	CLR RS1       ; Ensure correct register bank selection
+	
+	MOV R0, #30H   ; Load base address of data block  
+	MOV R1, #04H   ; Load counter (N = 4 bytes)  
+	MOV A, @R0     ; Load first data value into Accumulator  
+	CLR C          ; Clear Carry before addition  
+	MOV R3, #00H   ; Initialize upper byte storage  
+
+L3: DEC R1        ; Decrement counter  
+L2: INC R0        ; Move to next data location  
+	ADD A, @R0    ; Add next byte to Accumulator  	JC L1         ; If Carry is set, jump to L1  
+	SJMP L3       ; Continue loop  
+
+L1: INC R3        ; Increment upper byte (carry storage)  
+	DJNZ R1, L2   ; Decrement R1, loop until all values are added  
+
+	MOV R0, A     ; Store lower byte of sum in R0 
+	END
+
+1.8.1 Algorithm
+1. Start
+2. Initialize DPTR and R0 with source and destination address
+3
+3. Initialize R2 as a counter.
+4. Transfer the data byte by byte from source to destination.
+5. Increment source and destination memory pointer.
+6. Decrement counter.
+7. Check for count in R2, if not zero go to step 4 else continue
+8. Stop.
+
+;EXP 1C: Transfer a block of N bytes from external memory to internal memory.
+
+org 0000H
+   mov R0,#30H      ;source address
+   mov DPTR,#1000H  ;Destination address
+   mov R1,#07H      ;N block size
+L1:movx A,@DPTR     ;Data from source address
+   mov @R0,A        ;Moving data to destination address
+   INC R0           ;Increment dptr pointer
+   INC DPTR         ;Increment r0 pointer
+   DJNZ R1,L1       ;Check all transferred data or not
+END
+
+1.9.1 Algorithm
+1. Start
+2. Initialize the memory pointer for source and destination.
+3. Initialize the counter.
+4. Store the Fahrenheit data in accumulator from source location
+5. Do the operation C= (5/9) * (F- 32)
+6. Store the result in destination address
+7. Increase the source and destination address.
+8. Check all the Fahrenheit data is converted into Celsius if not goto
+step 4.
+9. Stop.
+
+;EXP 1D: Conversion of Fahrenheit to Celsius
+
+ORG 0000H
+	MOV R0,#30H ;Fahrenheit data
+	MOV R1,#40H ;Celsius data
+	MOV R2,#4   ;Number of data
+	
+	L1:	
+	MOV A,@R0   ; Load Fahrenheit value from memory (pointed by R0) into Accumulator
+	SUBB A,#32  ; Subtract 32 from Fahrenheit (F - 32)
+	MOV B,#9    ; Load 9 into register B
+	DIV AB      ; Divide (A) by 9 ? A = (F - 32) / 9, remainder in B
+	MOV B,#5    ; Load 5 into register B
+	MUL AB      ; Multiply (A) by 5 ? A = [(F - 32) / 9] * 5
+	MOV @R1,A   ; Store the final Celsius result into memory (pointed by R1)
+	INC R0      ; Move to the next Fahrenheit value
+	INC R1      ; Move to the next memory location for Celsius storage
+	DJNZ R2,L1  ; Decrement R2 and loop until all values are converted
+	END
+
+//HAlf adder
+;EXP 1E: Implementation of Half Adder using logic gate.
+
+
+ORG 0000
+	
+	SETB P1.0 ; Initialization of P1.0 as input (A)
+	SETB P1.1 ; Initialization of P1.1 as input (B)
+	
+START:	
+	MOV C,P1.1 ; Move bit P1.1 (B) to carry flag C
+	CPL C      ; Complement C (NOT B)
+	ANL C,P1.0 ; AND C with P1.0 (A AND NOT B)
+	MOV 00H,C  ; Store intermediate result in memory location 00H
+	
+	MOV C,P1.0 ; Move bit P1.0 (A) to carry flag C
+	CPL C      ; Complement C (NOT A)
+	ANL C,P1.1 ; AND C with P1.1 (NOT A AND B)
+	ORL C,00   ; OR with the previous result (XOR operation: A XOR B)
+	MOV P1.2,C ; Store result in P1.2 (SUM output)
+	
+	MOV C,P1.0 ; Move P1.0 (A) to C
+	ANL C,P1.1 ; AND C with P1.1 (A AND B)
+	MOV C,P1.3 ; Store result in P1.3 (CARRY output)
+	SJMP START ; Infinite loop to continuously check inputs and compute sum and carry
+
+	END        
