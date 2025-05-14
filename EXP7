@@ -61,7 +61,7 @@ int main(void)
 
 	while(1) {
 		LCD_Command(0x80);         // Move LCD cursor to first line
-		LCD_String("Sohan Fulzele"); // Display name
+		LCD_String("RTCYVGBUH"); // Display name
 
 		// ----- Read temperature from Sensor 1 (Channel 0) -----
 		celsius1 = (ADC_Read(0) * 4.88) / 10.0;
