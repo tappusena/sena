@@ -1,4 +1,4 @@
-//Algorithm
+
 /*ALGORITHM
 1. Start
 2. Define Port pins connected to LEDs, Relay, Buzzer, Switch S1.
@@ -20,10 +20,7 @@ Case 2:
 */
 
 ;EXPT 2: TO INTERFACE SWITCHES, LED'S , RELAY AND BUZZER WITH 89S52 MICROCONTROLLER
-;NAME: SOHAN ANAND FULZELE
-;ROLL NO.: 211001
-;GR NO.: 22310010
-;DOP:14/02/2025
+
 
 led equ p0 ;Define LED at Port 0
 sw equ p1.0 ;Define Switch at P1.0
