@@ -91,7 +91,7 @@ void motorcontrol(char* direction, uint8_t dir_flag)
 		LCD_Command(0x01);     // Clear LCD
 		_delay_ms(2);
 		LCD_Command(0x80);     // First line
-		LCD_String("Sohan Fulzele");
+		LCD_String("ERSDFGGHC");
 
 		LCD_Command(0xC0);     // Second line
 
