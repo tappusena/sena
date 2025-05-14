@@ -147,10 +147,10 @@ int main(void)
     while (1)  // Infinite loop to keep displaying text
     {
         LCD_Command(0x80);        // Move cursor to the first row, first column
-        LCD_String("Sohan Fulzele");  // Display name
+        LCD_String("SRDFTYGVB");  // Display name
 
         LCD_Command(0xC0);        // Move cursor to the second row, first column
-        LCD_String("Roll No.:211001");  // Display roll number
+        LCD_String("Roll No.:789465");  // Display roll number
 
         _delay_ms(1000);  // Delay to reduce flicker
     }
