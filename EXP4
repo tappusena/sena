@@ -165,3 +165,70 @@ l1: setb tr1            ; Start Timer1 to enable serial communication
     sjmp l1             ; Repeat indefinitely to receive more data
 
 end
+
+
+
+Algorithmor (Transmitting and receiving):
+
+1. Start
+2. Initialize Serial Communication
+Set up UART in Mode 1 or Mode 3 (SCON = 50H or 0D8H).
+Configure Timer 1 in Auto-Reload Mode (TMOD = 20H) for baud rate generation.
+Load the TH1 register with appropriate values for different baud rates:
+For 9600 baud rate: TH1 = 0FDH (-3)
+For 4800 baud rate: TH1 = 0FAH (-6)
+For 2400 baud rate: TH1 = 0F4H (-12)
+3. Start Timer 1
+Set TR1 bit to start timer (SETB TR1).
+4. Full-Duplex Communication Process
+Step 1: Wait for Incoming Data from PC
+Monitor the Receive Interrupt Flag (RI).
+If RI is set, move the received data from SBUF to the accumulator (A).
+Clear RI flag (CLR RI) for the next reception.
+Store the received character in memory or process it.
+Step 2: Transmit the Received Data Back to PC
+Move the received data from the accumulator to SBUF.
+Wait for the Transmit Interrupt Flag (TI) to be set.
+Clear TI flag (CLR TI) after successful transmission.
+Step 3: Repeat the Process for Continuous Communication
+Jump back to Step 1 for continuous data transfer.
+5. Stop
+
+; EXP 4C: To get data from the PC and transfer it to the PC (Both side communication) at various baud rates
+
+
+ORG 0000H
+    MOV SCON, #50H      ; Configure serial control register for mode 1 (8-bit UART)
+    MOV TMOD, #20H      ; Set Timer1 in mode 2 (8-bit auto-reload) for baud rate generation
+    MOV TH1, #-3        ; Load TH1 to set baud rate (9600 baud for 11.0592 MHz crystal)
+    SETB TR1            ; Start Timer1 to enable serial communication
+
+MAIN_LOOP:
+    ; Receiving Data
+    JNB RI, MAIN_LOOP   ; Wait until data is received (RI flag set)
+    MOV A, SBUF         ; Move received data from serial buffer (SBUF) to accumulator
+    MOV P1, A           ; Store received data in Port 1 (P1)
+    CLR RI              ; Clear RI flag for next reception
+    MOV DPTR, #MESS     ; Load DPTR with the address of the message string
+
+SEND_MSG:
+    CLR A               ; Clear accumulator before fetching character
+    MOVC A, @A+DPTR     ; Fetch character from the message using MOVC instruction
+    JZ MAIN_LOOP        ; If null terminator (0) is encountered, restart communication
+    MOV SBUF, A         ; Move character to serial buffer for transmission
+    JNB TI, $           ; Wait until transmission is complete (TI flag set)
+    CLR TI              ; Clear TI flag for next transmission
+    INC DPTR            ; Increment DPTR to fetch next character
+    SJMP SEND_MSG       ; Repeat until null character is reached
+
+MESS:
+    DB 'WELCOME TO VIIT', 0x0D, 0x0A  ; First message with carriage return and newline
+    DB 'WELCOME TO ENTC', 0x0D, 0x0A  ; Second message
+    DB 'Ayush Sonawane', 0x0D, 0x0A  ; Third message
+    DB 'PRN:22310077', 0x0D, 0x0A  ; Fourth message
+    DB 'Roll No.:211003', 0x0D, 0x0A  ; Fifth message
+    DB 'Batch:A1', 0x0D, 0x0A  ; Sixth message
+    DB 'Learning MCA', 0x0D, 0x0A  ; Seventh message
+    DB 0  ; Null-terminated string to indicate end of message
+
+END
