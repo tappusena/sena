@@ -127,8 +127,8 @@ org 0300h
 mess:
     db 'WELCOME TO VIIT',0x0a,0x0d  ; First message with newline and carriage return
     db 'WELCOME TO E AND TC',0x0a,0x0d  ; Second message
-    db 'NAME: Ayush Sonawane',0x0a,0x0d  ; Third message
-    db 'PRN NO.: 22310077',0x0a,0x0d,0  ; Fourth message with null terminator to end
+    db 'NAME: KMNOP',0x0a,0x0d  ; Third message
+    db 'PRN NO.: 854556',0x0a,0x0d,0  ; Fourth message with null terminator to end
 
 end
 
@@ -224,10 +224,10 @@ SEND_MSG:
 MESS:
     DB 'WELCOME TO VIIT', 0x0D, 0x0A  ; First message with carriage return and newline
     DB 'WELCOME TO ENTC', 0x0D, 0x0A  ; Second message
-    DB 'Ayush Sonawane', 0x0D, 0x0A  ; Third message
-    DB 'PRN:22310077', 0x0D, 0x0A  ; Fourth message
-    DB 'Roll No.:211003', 0x0D, 0x0A  ; Fifth message
-    DB 'Batch:A1', 0x0D, 0x0A  ; Sixth message
+    DB 'YFGDAVUFHB', 0x0D, 0x0A  ; Third message
+    DB 'PRN:798645', 0x0D, 0x0A  ; Fourth message
+    DB 'Roll No.:98746', 0x0D, 0x0A  ; Fifth message
+    DB 'Batch:D1', 0x0D, 0x0A  ; Sixth message
     DB 'Learning MCA', 0x0D, 0x0A  ; Seventh message
     DB 0  ; Null-terminated string to indicate end of message
 
