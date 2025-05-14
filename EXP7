@@ -1,134 +1,150 @@
-//Algorithm
-/*1. Enqueue Operation:
-   1. Start.
-   2. Create a new node.
-   3. Insert the data into the node.
-   4. If the queue is empty (i.e., head is NULL):
-      - Set both head and tail to the new node.
-   5. Otherwise:
-      - Attach the new node to the `next` of the tail.
-      - Update the tail to point to the new node.
-   6. End.
+7.8 ALGORITHM
+1. Start
+2. Make the pin for selected ADC channel as a input pin
+3. Turn on the ADC module of the AVR because it is disabled upon power on
+reset to save power (ADCSRA)
+4. Select the conversion speed. Use bits ADPS2:0 from ADCSRA register to
+select conversion speed
+5. Select voltage reference and ADC input channels. Use REFS0 and REFS1
+bits in the ADMUX register to select voltage reference and the MUX4:0 bits
+in ADMUX to select ADC input channels where LM35 is connected.
+6. Activate the start of conversion by writing a one to the ADSC bit of ADCSRA
+register.
+7. Waite for the conversion t be completed by polling the ADIF bit in the ADSRA
+register.
+8. After the ADIF bit has gone high, read the ADCL and ADCH register to
+get the digital data as a output. Notice that you have to read ADCL before
+ADCH; otherwise result will not be valid.
+9. Convert the digital output to equivalent degree Celsius using Celsius= (verf/1024
+* digital output) / 10
+10. If you want to read the selected channel again, go back to step 6
+11. Display the ADC output on LCD
+12. Stop.
 
-2. Dequeue Operation:
-   1. Start.
-   2. If the queue is empty (i.e., head is NULL):
-      - Print "Queue is empty".
-   3. Otherwise:
-      - Remove the element from the front (head).
-      - Move the head to the next node.
-   4. Free the memory of the dequeued node.
-   5. End.
+/*
+* EXPT7: To interface LM35 temperature sensor with AVR ATmega32 and display the surrounding temperature on the LCD16x2 display
 
-
-3. Display Operation:
-   1. Start.
-   2. If the queue is empty (i.e., head is NULL):
-      - Print "Queue is empty".
-   3. Otherwise:
-      - Traverse from head to tail and print each element.
-   4. End.
 */
-#include <iostream>
-using namespace std;
-struct Node {
-    int data;
-    Node* next;
-};
 
-class Queue {
-    Node* front; // Pointer to the front of the queue
-    Node* rear;  // Pointer to the rear of the queue
+#define F_CPU 8000000UL         // Define CPU frequency as 8 MHz for delay functions
+#include <avr/io.h>             // AVR I/O definitions (for ports, registers, etc.)
+#include <util/delay.h>         // For using _delay_ms()
+#include "LCD_1.h"              // Custom LCD library
+#define DEGREE_SYMBOL 0xDF      // ASCII code for degree symbol (°) for LCD
 
-public:
-    Queue() {
-        front = NULL;
-        rear = NULL;
-    }
+// ----------- ADC Initialization Function ------------
+void ADC_Init(){
+	DDRA = 0x00;                 // Set PORTA as input (ADC channels are on PORTA)
+	ADCSRA = 0x87;               // ADC Enable, Prescaler = 128 (ADEN=1, ADPS2:0=111)
+	ADMUX = 0x40;                // Reference = AVCC (REFS0 = 1), ADC channel 0 selected initially
+}
 
-    // Enqueue operation
-    void enqueue(int value) {
-        Node* newNode = new Node(); // Step 2: Create a new node
-        newNode->data = value;      // Step 3: Insert data into the node
-        newNode->next = NULL;       // Initialize the next pointer to NULL
+// ----------- ADC Read Function ------------
+int ADC_Read(char channel){
+	channel &= 0x07;             // Mask channel to stay within 0-7 range (only 3 LSBs used)
+	ADMUX = (1<<REFS0) | channel; // Set AVCC as reference and select channel
+	ADCSRA |= (1<<ADSC);         // Start conversion
+	while (!(ADCSRA & (1<<ADIF))); // Wait for conversion to complete
+	ADCSRA |= (1<<ADIF);         // Clear ADC interrupt flag
+	_delay_ms(1);                // Small delay for safety
+	return ADCW;                 // Return 10-bit ADC result
+}
 
-        if (front == NULL) {        // Step 4: Check if the queue is empty
-            front = newNode;        // Set front and rear to the new node
-            rear = newNode;
-        } else {
-            rear->next = newNode;  // Step 5: Attach new node to rear's next
-            rear = newNode;        // Update rear to the new node
-        }
-        cout << value << " enqueued to the queue." << endl;
-    }
+// ----------- Main Function ------------
+int main(void)
+{
+	char Temperature1[10], Temperature2[10]; // Buffers to hold temperature strings for LCD
+	float celsius1, celsius2;               // To hold calculated temperature values
 
-    // Dequeue operation
-    void dequeue() {
-        if (front == NULL) {        // Step 2: Check if the queue is empty
-            cout << "Queue is empty." << endl;
-            return;
-        }
+	LCD_Init();    // Initialize LCD
+	ADC_Init();    // Initialize ADC
 
-        Node* temp = front;         // Step 3: Remove the front element
-        cout << temp->data << " dequeued from the queue." << endl;
-        front = front->next;       // Move front to the next node
+	while(1) {
+		LCD_Command(0x80);         // Move LCD cursor to first line
+		LCD_String("Sohan Fulzele"); // Display name
 
-        if (front == NULL) {       // If the queue becomes empty
-            rear = NULL;
-        }
+		// ----- Read temperature from Sensor 1 (Channel 0) -----
+		celsius1 = (ADC_Read(0) * 4.88) / 10.0;
+		// Multiply ADC value by 4.88 to convert to millivolts (5V/1024 ? 4.88mV)
+		// Then divide by 10 assuming LM35 (10mV per °C)
+		sprintf(Temperature1, "T1:%d%cC", (int)celsius1, DEGREE_SYMBOL);
 
-        delete temp;               // Step 4: Free memory of the dequeued node
-    }
+		// ----- Read temperature from Sensor 2 (Channel 1) -----
+		celsius2 = (ADC_Read(1) * 4.88) / 10.0;
+		sprintf(Temperature2, "T2:%d%cC", (int)celsius2, DEGREE_SYMBOL);
 
-    // Display operation
-    void display() {
-        if (front == NULL) {        // Step 2: Check if the queue is empty
-            cout << "Queue is empty." << endl;
-            return;
-        }
+		// ----- Display both temperatures on second LCD line -----
+		LCD_Command(0xC0);         // Move to second line
+		LCD_String(Temperature1);  // Display temperature from sensor 1
+		LCD_Command(0xC0 + 9);     // Move to 10th character on second line
+		LCD_String(Temperature2);  // Display temperature from sensor 2
 
-        Node* current = front;      // Step 3: Traverse and print elements
-        cout << "Queue contents: ";
-        while (current != NULL) {
-            cout << current->data << " ";
-            current = current->next;
-        }
-        cout << endl;
-    }
-};
+		_delay_ms(500);            // Wait before next update
+	}
+	return 0;
+}
 
-int main() {
-    Queue queue;
-    int choice, value;
+//header file for lcd
+// Define LCD port and pin connections
+#define LCD_Data_Dir DDRC // LCD data port direction
+#define LCD_Command_Dir DDRD // LCD command port direction
+#define LCD_Data_Port PORTC // LCD data port
+#define LCD_Command_Port PORTD // LCD command port
+#define RS PD7 // Register select pin
+#define RW PD6 // Read/write pin
+#define EN PD5 // Enable pin
 
-    do {
-        cout << "\nMenu:" << endl;
-        cout << "1. Enqueue" << endl;
-        cout << "2. Dequeue" << endl;
-        cout << "3. Display" << endl;
-        cout << "4. Exit" << endl;
-        cout << "Enter your choice: ";
-        cin >> choice;
+// Function prototypes
+void LCD_Command(unsigned char cmnd); // Send command to LCD
+void LCD_Char(unsigned char char_data); // Display a single character
+void LCD_String(char *str); // Display a string
+void LCD_Init(void); // Initialize LCD
 
-        switch (choice) {
-        case 1:
-            cout << "Enter the value to enqueue: ";
-            cin >> value;
-            queue.enqueue(value);
-            break;
-        case 2:
-            queue.dequeue();
-            break;
-        case 3:
-            queue.display();
-            break;
-        case 4:
-            cout << "Exiting the program." << endl;
-            break;
-        default:
-            cout << "Invalid choice! Please try again." << endl;
-        }
-    } while (choice != 4);
+// LCD Initialization function
+void LCD_Init(void)
+{
+	LCD_Command_Dir = 0xFF; // Set all command port pins as output
+	LCD_Data_Dir = 0xFF; // Set all data port pins as output
+	_delay_ms(20); // LCD power-on delay
+	LCD_Command(0x38); // 8-bit mode, 2-line display, 5x7 font
+	LCD_Command(0x0C); // Display ON, Cursor OFF
+	LCD_Command(0x06); // Auto increment cursor
+	LCD_Command(0x01); // Clear display screen
+	_delay_ms(20); // Wait for commands to execute
+	LCD_Command(0x80); // Move cursor to the beginning
+}
 
-    return 0;
+// Function to send a command to LCD
+void LCD_Command(unsigned char cmnd)
+{
+	LCD_Data_Port = cmnd; // Load command to data port
+	LCD_Command_Port &= ~(1 << RS); // RS = 0 for command mode
+	
+	
+	LCD_Command_Port &= ~(1 << RW); // RW = 0 for write mode
+	LCD_Command_Port |= (1 << EN); // Generate a high-to-low pulse on EN pin
+	_delay_ms(1);
+	LCD_Command_Port &= ~(1 << EN); // Clear enable pin
+	_delay_ms(2); // Wait for LCD to process
+}
+
+// Function to display a single character on LCD
+void LCD_Char(unsigned char char_data)
+{
+	LCD_Data_Port = char_data; // Load character to data port
+	LCD_Command_Port |= (1 << RS); // RS = 1 for data mode
+	LCD_Command_Port &= ~(1 << RW); // RW = 0 for write mode
+	LCD_Command_Port |= (1 << EN); // Generate a high-to-low pulse on EN pin
+	_delay_ms(1);
+	LCD_Command_Port &= ~(1 << EN); // Clear enable pin
+	_delay_ms(2); // Wait for LCD to process
+}
+// Function to display a string on LCD
+void LCD_String(char *str)
+{
+	int i;
+	for (i = 0; str[i] != 0; i++) // Loop through each character
+	{
+		LCD_Char(str[i]); // Send character to LCD
+	}
 }
