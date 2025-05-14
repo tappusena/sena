@@ -1,0 +1,150 @@
+Algorithm for Stepper Motor Control
+1. Start the program.
+2. Initialize the microcontroller ports.
+3. Define the stepper motor sequence for rotation.
+4. Send the step sequence to the motor driver.
+5. Introduce a delay to control speed.
+6. Repeat the sequence for continuous rotation.
+7. Change the sequence to reverse direction (if required).
+8. Stop the motor when needed.
+9. End the program.
+
+ ;EXPT5A(1): TO INTERFACE STEPPER MOTOR WITH 89S52 AND ROTATE THE STEPPER MOTOR IN WAVE DRIVE 
+;STEPPING CLOCKWISE AND ANTICLOCKWISE DIRECTION FOR 360° CONTINUOUSLY
+
+
+
+        ORG 0000H    
+L1:     MOV R3,#12   ; Load register R3 with 12 
+
+L2:     MOV P1,#08H  ; Set port P1 to 08H 
+        ACALL DELAY  ; Call the DELAY subroutine
+        MOV P1,#04H  ; Set port P1 to 04H
+        ACALL DELAY  ; Call the DELAY subroutine
+        MOV P1,#02H  ; Set port P1 to 02H
+        ACALL DELAY  ; Call the DELAY subroutine
+        MOV P1,#01H  ; Set port P1 to 01H
+        ACALL DELAY  ; Call the DELAY subroutine
+        DJNZ R3,L2   ; Decrement R3 and jump to L2 if not zero 
+
+        MOV R3,#12   ; Reload R3 with 12 for reverse sequence
+
+L3:     MOV P1,#01H  ; Set port P1 to 01H 
+        ACALL DELAY  ; Call the DELAY subroutine
+        MOV P1,#02H  ; Set port P1 to 02H
+        ACALL DELAY  ; Call the DELAY subroutine
+        MOV P1,#04H  ; Set port P1 to 04H
+        ACALL DELAY  ; Call the DELAY subroutine
+        MOV P1,#08H  ; Set port P1 to 08H
+        ACALL DELAY  ; Call the DELAY subroutine
+        DJNZ R3,L3   ; Decrement R3 and jump to L3 if not zero 
+
+        SJMP L1     
+
+; Delay Subroutine
+DELAY:  MOV R1,#255  ; Load R1 with 255 
+L4:     MOV R0,#255  ; Load R0 with 255 
+L5:     MOV R2,#01   ; Load R2 with 1 (inner loop counter)
+L6:     DJNZ R2,L6   ; Decrement R2 and loop until it reaches 0
+        DJNZ R0,L5   ; Decrement R0 and loop until it reaches 0
+        DJNZ R1,L4   ; Decrement R1 and loop until it reaches 0
+        RET          ; Return from the subroutine
+
+        END          
+
+;EXPT5B: TO INTERFACE STEPPER MOTOR WITH 89S52 AND ROTATE THE STEPPER MOTOR IN FULL DRIVE 
+;STEPPING CLOCKWISE AND ANTICLOCKWISE DIRECTION FOR 180° CONTINUOUSLY
+
+
+        ORG 0000H
+START:  MOV R4,#06         ; Load 24 steps for 180° Clockwise Rotation
+L1:     MOV P1,#03H        ; Step 1: Coil 1 & 2 ON
+        ACALL DELAY
+        MOV P1,#06H        ; Step 2: Coil 2 & 3 ON
+        ACALL DELAY
+        MOV P1,#0CH        ; Step 3: Coil 3 & 4 ON
+        ACALL DELAY
+        MOV P1,#09H        ; Step 4: Coil 4 & 1 ON
+        ACALL DELAY
+        DJNZ R4,L1         ; Decrease Counter Until 06 Steps Completed
+		
+        MOV R4,#06         ; Load 24 steps for 180° Anticlockwise Rotation
+L2:     MOV P1,#09H        ; Step 4: Coil 4 & 1 ON (Reverse)
+        ACALL DELAY
+        MOV P1,#0CH        ; Step 3: Coil 3 & 4 ON (Reverse)
+        ACALL DELAY
+        MOV P1,#06H        ; Step 2: Coil 2 & 3 ON (Reverse)
+        ACALL DELAY
+        MOV P1,#03H        ; Step 1: Coil 1 & 2 ON (Reverse)
+        ACALL DELAY
+        DJNZ R4,L2         ; Decrease Counter Until 06 Steps Completed
+        SJMP START         ; Repeat the Process Continuously
+
+DELAY:  MOV R1,#255
+L3:     MOV R2,#255
+L4:     MOV R3,#02
+L5:     DJNZ R3,L5
+        DJNZ R2,L4
+        DJNZ R1,L3
+        RET
+
+        END
+
+;EXPT5C TO INTERFACE STEPPER MOTOR WITH 89S52 AND ROTATE THE STEPPER MOTOR IN HALF DRIVE 
+;STEPPING CLOCKWISE AND ANTICLOCKWISE DIRECTION FOR 360° CONTINUOUSLY
+
+
+        ORG 0000H            
+
+L1:     MOV R3,#12           ; LOAD COUNTER FOR 180° CLOCKWISE ROTATION (12 CYCLES)
+
+L2:     MOV P1,#01H          ; STEP 1: COIL 1 ON
+        ACALL DELAY
+        MOV P1,#03H          ; STEP 2: COIL 1 & 2 ON
+        ACALL DELAY
+        MOV P1,#02H          ; STEP 3: COIL 2 ON
+        ACALL DELAY
+        MOV P1,#06H          ; STEP 4: COIL 2 & 3 ON
+        ACALL DELAY
+        MOV P1,#04H          ; STEP 5: COIL 3 ON
+        ACALL DELAY
+        MOV P1,#0CH          ; STEP 6: COIL 3 & 4 ON
+        ACALL DELAY
+        MOV P1,#08H          ; STEP 7: COIL 4 ON
+        ACALL DELAY
+        MOV P1,#09H          ; STEP 8: COIL 4 & 1 ON
+        ACALL DELAY
+        DJNZ R3,L2           ; DECREMENT COUNTER UNTIL 12 STEPS COMPLETED
+
+        MOV R3,#12           ; LOAD COUNTER FOR 180° ANTICLOCKWISE ROTATION (12 CYCLES)
+
+L3:     MOV P1,#09H          ; STEP 8: COIL 4 & 1 ON (REVERSE)
+        ACALL DELAY
+        MOV P1,#08H          ; STEP 7: COIL 4 ON (REVERSE)
+        ACALL DELAY
+        MOV P1,#0CH          ; STEP 6: COIL 3 & 4 ON (REVERSE)
+        ACALL DELAY
+        MOV P1,#04H          ; STEP 5: COIL 3 ON (REVERSE)
+        ACALL DELAY
+        MOV P1,#06H          ; STEP 4: COIL 2 & 3 ON (REVERSE)
+        ACALL DELAY
+        MOV P1,#02H          ; STEP 3: COIL 2 ON (REVERSE)
+        ACALL DELAY
+        MOV P1,#03H          ; STEP 2: COIL 1 & 2 ON (REVERSE)
+        ACALL DELAY
+        MOV P1,#01H          ; STEP 1: COIL 1 ON (REVERSE)
+        ACALL DELAY
+        DJNZ R3,L3           ; DECREMENT COUNTER UNTIL 12 STEPS COMPLETED
+
+        SJMP L1              ; REPEAT THE PROCESS CONTINUOUSLY
+
+; DELAY SUBROUTINE - PROVIDES TIME DELAY FOR STEPPER MOTOR ROTATION
+DELAY:  MOV R1,#255          ; OUTER LOOP COUNT
+L4:     MOV R0,#255          ; MIDDLE LOOP COUNT
+L5:     MOV R2,#01           ; INNER LOOP COUNT
+L6:     DJNZ R2,L6           ; DECREMENT INNER LOOP
+        DJNZ R0,L5           ; DECREMENT MIDDLE LOOP
+        DJNZ R1,L4           ; DECREMENT OUTER LOOP
+        RET                  ; RETURN FROM DELAY SUBROUTINE
+
+        END             
