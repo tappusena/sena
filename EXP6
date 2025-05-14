@@ -1,0 +1,159 @@
+6.9 ALGORITHM (LCD in 8 bit mode)
+1. Start
+2. Define LCD Data pins connected to respective port of ATmega32 microcon-
+troller
+3. Define RS, RW, EN control pins of LCD connected to respective port pins.
+4. Initialize mode of LCD interface with Microcontroller by sending command.
+(To initialize LCD as 8 bit data length, no. of lines 2, resolution 5x7 dots,
+command word is
+0 0 1 DL N F 0 0 = 0011 1000 = 38H)
+(Time required to execute this command by LCD is 40 μsec)
+5. To turn on the display and cursor by sending command
+(Command word is 0 0 0 0 1 D C B = 0000 1110 = 0EH )(40 μsec)
+6. To clear LCD Display (DDRAM) and cursor at home position by sending
+command (Command word is 0 0 0 0 0 0 0 1 = 01H) (82 μsec to 1.64 msec)
+7. Cursor/Display shift, Screen Section as display character written by sending
+command (To shift cursor to left for next character; Command word is 0 0 0
+0 0 1 I/O S = 0000 0110 = 06H) )(40 μsec)
+8. Select 1st line and position to display massage by sending command (80h) (40
+μsec) (* Call command subroutine in between each command)
+9. Load ASCII code of message into accumulator
+10. Call Display subroutine and delay/BZ subroutine (as above) in between each
+character
+11. Select 2nd line and position to display massage (0C0H)
+12. Call command subroutine and delay/BZ subroutine in between each command
+13. Load ASCII code of message into accumulator
+14. Call Display subroutine and delay/BZ subroutine (as above) in between each
+character
+15. Stop.
+
+6.9.1 ALGORITHM for command subroutine (for 8 bit mode)
+1. Check whether LCD is busy or ready for communication, call delay subroutine
+(Provide sufficient time to LCD to complete previous work and to be ready
+for accepting next information)
+Give some time to LCD to execute previous command by providing delay or
+by checking busy flag (D7 bit) (call delay subroutine or ready subroutine)
+(min delay is 1.64 msec ref: Command table for LCD)
+*Execution time required for LCD. (fixed time for each command)
+2. Copy command from register A to the Port where LCD data lines are inter-
+faced.
+3. Select command register of LCD by clearing RS (i.e. RS–>0)
+4. Select LCD in write mode, R/W=0.
+5. Enable LCD by giving high to low pulse to E pin of LCD
+(i.e. EN –>1 for high pulse then some no operation or delay around 1-2
+machine cycle and then EN –>0).
+EN = high to low / negative edge triggered —-> Write
+EN = low to high / positive edge triggered —-> Read
+6. Return to main program
+
+6.9.2 ALGORITHM for display subroutine (for 8 bit mode)
+1. Check whether LCD is busy or ready for communication, call delay subroutine
+or Check busy flag D7.
+2. Copy data from register A to the Port where LCD data lines are interfaced.
+3. Select command register of LCD by setting RS (i.e. RS–>1)
+4. Select LCD in write mode, R/W=0.
+5. Enable LCD by giving high to low pulse to E pin of LCD
+(i.e. EN –>1 for high pulse then some no operation or delay around 1-2
+machine cycle and then EN –>0).
+EN = high to low / negative edge triggered —-> Write
+EN = low to high / positive edge triggered —-> Read
+6. Return to main program
+
+6.9.3 ALGORITHM for checking busy bit/flag
+1. Make port pin connected to D7 pin of LCD as input port
+2. Select RS=0 to access command register.
+3. Make R/W=1 to read command register.
+4. Low to high pulse on EN pin to read the D7 pin
+5. Read D7 bit of LCD if it is busy D7=1 go to step 4
+6. If D7=0 return to program.
+
+/*
+ * EXPT6: To interface a 16x2 LCD with the AVR ATmega32 microcontroller, program it using C language, and display text messages by sending appropriate commands and data through the microcontroller.
+ */
+
+#define F_CPU 8000000UL  // Define CPU frequency for delay
+#include <avr/io.h>      // Include AVR input-output library
+#include <util/delay.h>  // Include delay library
+
+// Define LCD port and pin connections
+#define LCD_Data_Dir DDRC       // LCD data port direction
+#define LCD_Command_Dir DDRD    // LCD command port direction
+#define LCD_Data_Port PORTC     // LCD data port
+#define LCD_Command_Port PORTD  // LCD command port
+#define RS PD7                  // Register select pin
+#define RW PD6                  // Read/write pin
+#define EN PD5                  // Enable pin
+
+// Function prototypes
+void LCD_Command(unsigned char cmnd);  // Send command to LCD
+void LCD_Char(unsigned char char_data);  // Display a single character
+void LCD_String(char *str);  // Display a string
+void LCD_Init(void);  // Initialize LCD
+
+// LCD Initialization function
+void LCD_Init(void)
+{
+    LCD_Command_Dir = 0xFF;  // Set all command port pins as output
+    LCD_Data_Dir = 0xFF;     // Set all data port pins as output
+    _delay_ms(20);           // LCD power-on delay
+
+    LCD_Command(0x38);  // 8-bit mode, 2-line display, 5x7 font
+    LCD_Command(0x0C);  // Display ON, Cursor OFF
+    LCD_Command(0x06);  // Auto increment cursor
+    LCD_Command(0x01);  // Clear display screen
+    _delay_ms(20);       // Wait for commands to execute
+    LCD_Command(0x80);  // Move cursor to the beginning
+}
+
+// Function to send a command to LCD
+void LCD_Command(unsigned char cmnd)
+{
+    LCD_Data_Port = cmnd;       // Load command to data port
+    LCD_Command_Port &= ~(1 << RS);  // RS = 0 for command mode
+    LCD_Command_Port &= ~(1 << RW);  // RW = 0 for write mode
+    LCD_Command_Port |= (1 << EN);   // Generate a high-to-low pulse on EN pin
+    _delay_ms(1);
+    LCD_Command_Port &= ~(1 << EN);  // Clear enable pin
+    _delay_ms(2);                    // Wait for LCD to process
+}
+
+// Function to display a single character on LCD
+void LCD_Char(unsigned char char_data)
+{
+    LCD_Data_Port = char_data;        // Load character to data port
+    LCD_Command_Port |= (1 << RS);    // RS = 1 for data mode
+    LCD_Command_Port &= ~(1 << RW);   // RW = 0 for write mode
+    LCD_Command_Port |= (1 << EN);    // Generate a high-to-low pulse on EN pin
+    _delay_ms(1);
+    LCD_Command_Port &= ~(1 << EN);   // Clear enable pin
+    _delay_ms(2);                     // Wait for LCD to process
+}
+
+// Function to display a string on LCD
+void LCD_String(char *str)
+{
+    int i;
+    for (i = 0; str[i] != 0; i++)  // Loop through each character
+    {
+        LCD_Char(str[i]);  // Send character to LCD
+    }
+}
+
+// Main function
+int main(void)
+{
+    LCD_Init();  // Initialize LCD
+
+    while (1)  // Infinite loop to keep displaying text
+    {
+        LCD_Command(0x80);        // Move cursor to the first row, first column
+        LCD_String("Sohan Fulzele");  // Display name
+
+        LCD_Command(0xC0);        // Move cursor to the second row, first column
+        LCD_String("Roll No.:211001");  // Display roll number
+
+        _delay_ms(1000);  // Delay to reduce flicker
+    }
+
+    return 0;
+}
