@@ -1,0 +1,277 @@
+3.8 ALGORITHM (LCD in 8 bit mode)
+1. Start
+2. Define LCD Data pins connected to respective port of 89s52
+3. Define RS, RW, EN control pins of LCD connected to respective port pins.
+4. Initialize mode of LCD interface with Micro-controller by sending command.
+(To initialize LCD as 8 bit data length, no. of lines 2, resolution 5x7 dots,
+command word is
+0 0 1 DL N F 0 0 = 0011 1000 = 38H)
+(Time required to execute this command by LCD is 40 μsec)
+5. To turn on the display and cursor by sending command
+(Command word is 0 0 0 0 1 D C B = 0000 1110 = 0EH )(40 μsec)
+6. To clear LCD Display (DDRAM) and cursor at home position by sending
+command (Command word is 0 0 0 0 0 0 0 1 = 01H) (82 μsec to 1.64 msec)
+7. Cursor/Display shift, Screen Section as display character written by sending
+command (To shift cursor to left for next character; Command word is 0 0 0
+0 0 1 I/O S = 0000 0110 = 06H) )(40 μsec)
+8. Select 1st line and position to display massage by sending command (80h) (40
+μsec) (* Call command subroutine in between each command)
+9. Load ASCII code of message into accumulator
+10. Call Display subroutine and delay/BZ subroutine (as above) in between each
+character
+11. Select 2nd line and position to display massage (0C0H)
+12. Call command subroutine and delay/BZ subroutine in between each command
+13. Load ASCII code of message into accumulator
+14. Call Display subroutine and delay/BZ subroutine (as above) in between each
+character
+15. Stop.
+
+3.8.1 ALGORITHM for command subroutine (for 8 bit mode)
+1. Check whether LCD is busy or ready for communication, call delay subroutine
+(Provide sufficient time to LCD to complete previous work and to be ready
+for accepting next information)
+Give some time to LCD to execute previous command by providing delay or
+by checking busy flag (D7 bit) (call delay subroutine or ready subroutine)
+(min delay is 1.64 msec ref: Command table for LCD)
+*Execution time required for LCD. (fixed time for each command)
+2. Copy command from register A to the Port where LCD data lines are inter-
+faced.
+3. Select command register of LCD by clearing RS (i.e. RS–>0)
+4. Select LCD in write mode, R/W=0.
+5. Enable LCD by giving high to low pulse to E pin of LCD
+(i.e. EN –>1 for high pulse then some no operation or delay around 1-2
+machine cycle and then EN –>0).
+EN = high to low / negative edge triggered —-> Write
+EN = low to high / positive edge triggered —-> Read
+6. Return to main program
+
+3.8.2 ALGORITHM for display subroutine (for 8 bit mode)
+1. Check whether LCD is busy or ready for communication, call delay subroutine
+or Check busy flag D7.
+2. Copy data from register A to the Port where LCD data lines are interfaced.
+3. Select command register of LCD by setting RS (i.e. RS–>1)
+4. Select LCD in write mode, R/W=0.
+5. Enable LCD by giving high to low pulse to E pin of LCD
+(i.e. EN –>1 for high pulse then some no operation or delay around 1-2
+machine cycle and then EN –>0).
+EN = high to low / negative edge triggered —-> Write
+EN = low to high / positive edge triggered —-> Read
+6. Return to main program
+
+3.8.3 ALGORITHM for checking busy bit/flag
+1. Make port pin connected to D7 pin of LCD as input port
+2. Select RS=0 to access command register.
+3. Make R/W=1 to read command register.
+4. Low to high pulse on EN pin to read the D7 pin
+5. Read D7 bit of LCD if it is busy D7=1 go to step 4
+6. If D7=0 return to program.
+
+
+
+;EXP 3A: Interfacing of 16X2 LCD in 8 bit mode with 89S52 microcontroller
+;Programming and demonstration using single character
+
+
+; Define LCD pins
+LCD EQU P3 ; LCD data lines connected to Port 2
+RS EQU P2.0 ; Register Select pin connected to P3.0
+RW EQU P2.1 ; Read/Write pin connected to P3.1
+EN EQU P2.3 ; Enable pin connected to P3.2
+
+ORG 0000H ; Start of program
+
+; LCD Initialization
+MOV A,#38H ; Function set: 8-bit mode, 2-line display, 5x7 font
+ACALL COMMAND
+MOV A,#0EH ; Display ON, cursor ON, blinking OFF
+ACALL COMMAND
+MOV A,#01 ; Clear display
+ACALL COMMAND
+MOV A,#06H ; Entry mode: Increment cursor, no shift
+ACALL COMMAND
+MOV A,#80H ; Move cursor to beginning of first line
+ACALL COMMAND
+
+; Display "NAME"
+MOV A,#'N' ; Load ASCII value of 'N' into accumulator
+ACALL DISPLAY
+MOV A,#'A'
+ACALL DISPLAY
+MOV A,#'M'
+ACALL DISPLAY
+MOV A,#'E'
+ACALL DISPLAY
+MOV A,#':'
+ACALL DISPLAY
+MOV A,#' ' ; SpaceACALL DISPLAY
+MOV A,#'P'
+ACALL DISPLAY
+MOV A,#'R'
+ACALL DISPLAY
+MOV A,#'A'
+ACALL DISPLAY
+MOV A,#'N'
+ACALL DISPLAY
+MOV A,#'E'
+ACALL DISPLAY
+MOV A,#'S'
+ACALL DISPLAY
+MOV A,#'H'
+
+; Move to second line
+MOV A,#0C0H ; Move cursor to beginning of second line
+ACALL COMMAND
+
+; Display "ROLL"
+MOV A,#'R'
+ACALL DISPLAY
+MOV A,#'O'
+ACALL DISPLAY
+MOV A,#'L'
+ACALL DISPLAY
+MOV A,#'L'
+ACALL DISPLAY
+MOV A,#':'
+ACALL DISPLAY
+MOV A,#' ' ; Space
+ACALL DISPLAY
+MOV A,#'2' ; Display roll number
+ACALL DISPLAY
+MOV A,#'1'
+ACALL DISPLAY
+MOV A,#'2'
+ACALL DISPLAY
+MOV A,#'0'
+ACALL DISPLAY
+MOV A,#'6'
+ACALL DISPLAY
+MOV A,#'3'
+ACALL DISPLAY
+
+; Command execution routine
+COMMAND:
+ACALL DELAY ; Call delay for proper execution timing
+MOV LCD,A ; Send command to LCD
+CLR RS ; RS = 0 for command mode
+CLR RW ; RW = 0 for write mode
+SETB EN ; Enable LCD
+NOP ; Small delay
+NOP
+CLR EN ; Disable LCD
+RET ; Return from subroutine
+
+; Data display routine
+DISPLAY:
+ACALL DELAY ; Call delay for proper execution timing
+MOV LCD,A ; Send data to LCD
+SETB RS ; RS = 1 for data mode
+CLR RW ; RW = 0 for write mode
+SETB EN ; Enable LCD
+NOP ; Small delay
+NOP
+CLR EN ; Disable LCD
+RET ; Return from subroutine
+
+; Delay routine (~2ms)
+DELAY:
+MOV R7, #2 ; Outer loop count
+L1: MOV R6, #255 ; Middle loop count
+L2: MOV R5, #255 ; Inner loop count
+L3: DJNZ R5,L3 ; Decrement inner loop and repeat until zero
+DJNZ R6,L2 ; Decrement middle loop and repeat until zero
+DJNZ R7,L1 ; Decrement outer loop and repeat until zero
+RET ; Return from subroutine
+
+END ; End of program
+
+
+;EXP 3B: Interfacing of 16X2 LCD in 8 bit mode with 89S52 microcontroller
+;Programming and demonstration using MOVC instruction
+
+
+
+; Define LCD pins
+    LCD EQU P3
+    RS  EQU P2.0
+    RW  EQU P2.1
+    EN  EQU P2.3
+
+    ORG 0000H ; Start of program
+
+   
+    MOV A, #38H
+    ACALL COMMAND
+    MOV A, #0EH
+    ACALL COMMAND
+    MOV A, #01
+    ACALL COMMAND
+    MOV A, #06H
+    ACALL COMMAND
+    MOV A, #80H
+    ACALL COMMAND
+
+    
+    MOV DPTR, #MSG1
+    ACALL PRINT_STRING
+
+    ; Move to second line
+    MOV A, #0C0H
+    ACALL COMMAND
+
+    
+    MOV DPTR, #MSG2
+    ACALL PRINT_STRING
+
+    SJMP $
+
+    ; Command execution routine
+COMMAND:
+    ACALL DELAY
+    MOV LCD, A
+    CLR RS  ; Command mode
+    CLR RW  ; Write mode
+    SETB EN
+    NOP
+    NOP
+    CLR EN
+    RET
+
+    ; Data display routine
+DISPLAY:
+    ACALL DELAY
+    MOV LCD, A
+    SETB RS  ; Data mode
+    CLR RW   ; Write mode
+    SETB EN
+    NOP
+    NOP
+    CLR EN
+    RET
+
+    ; Print string from code memory
+PRINT_STRING:
+    CLR A
+    MOVC A, @A+DPTR  ; Read from code memory
+    JZ DONE          ; Stop if NULL character (0x00)
+    ACALL DISPLAY
+    INC DPTR
+    SJMP PRINT_STRING
+DONE:NOP
+    RET
+
+    ; Delay routine (~2ms)
+DELAY:
+    MOV R7, #2
+L1: MOV R6, #255
+L2: MOV R5, #255
+L3: DJNZ R5, L3
+    DJNZ R6, L2
+    DJNZ R7, L1
+    RET
+
+    ; Data stored in code memory
+    ORG 0300H
+MSG1: DB 'NAME: PRANESH', 0  ; Null-terminated string
+MSG2: DB 'PRN NO.:22311733', 0  ; Null-terminated string
+
+    END
