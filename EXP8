@@ -1,0 +1,194 @@
+8.9 ALGORITHM
+1. Start
+2. Initialize Microcontroller
+• Configure PB3 (OC0) as an output pin.
+4
+• Set up TIMER0 in Fast PWM mode with a prescaler of 64.
+• Enable Non-inverting PWM mode for speed control.
+3. Set Initial Motor Speed
+• Assign an initial PWM duty cycle value to OCR0.
+4. Gradually Increase Motor Speed
+• Increment OCR0 in steps of 10% (e.g., 25 for an 8-bit timer).
+• Introduce a small delay to allow gradual acceleration.
+• Repeat until 100% duty cycle (255) is reached.
+5. Gradually Decrease Motor Speed
+• Decrement OCR0 in steps of 10% (e.g., 25 per step).
+• Introduce a delay for smooth deceleration.
+• Repeat until 0% duty cycle is reached.
+6. Loop Continuously
+• Repeat steps 4 and 6 indefinitely.
+7. Stop.
+
+/*
+ * EXPT 8:To interface a DC motor with the ATmega32 microcontroller
+ * using Fast PWM mode (TIMER0) and the L293D motor driver,
+ * enabling precise control over the motor speed and direction.
+ */ 
+
+#define F_CPU 16000000UL  // Define CPU frequency as 16 MHz for delay functions
+#include <avr/io.h>       // Include AVR I/O header file for register definitions
+#include <util/delay.h>   // Include delay utility for _delay_ms function
+#include <stdio.h>        // Include stdio for sprintf
+#include "lcd1.h"         // Include custom LCD driver header
+
+// Function to control motor direction and display speed on LCD
+void motorcontrol(char* direction, uint8_t dir_flag)
+{
+	char buffer[16];  // Buffer to hold the formatted LCD string
+	int i;
+
+	// ----- Speed Increasing Loop -----
+	// For CW: Display 0% to 100%
+	// For ACW: Display 100% to 0%
+	for(i = 0; i <= 255; i += 26)  // Increment PWM duty cycle in steps of ~10%
+	{
+		OCR0 = i;  // Set PWM duty cycle
+
+		if (dir_flag == 0) // CLOCKWISE
+		{
+			PORTB |= (1 << PB3);   // IN1 = PWM (OC0 output pin)
+			PORTB &= ~(1 << PB4);  // IN2 = LOW
+		}
+		else // ANTICLOCKWISE
+		{
+			PORTB &= ~(1 << PB3);  // IN1 = LOW
+			PORTB |= (1 << PB4);   // IN2 = PWM
+		}
+
+		LCD_Command(0x01);     // Clear LCD
+		_delay_ms(2);
+		LCD_Command(0x80);     // Move cursor to first line
+		LCD_String("Sohan Fulzele");
+
+		LCD_Command(0xC0);     // Move cursor to second line
+
+		// Display speed depending on direction
+		if (dir_flag == 0)
+		sprintf(buffer, "%s %d%%", direction, (i * 100) / 255);  // Increasing for CW
+		else
+		sprintf(buffer, "%s %d%%", direction, 100 - (i * 100) / 255); // Decreasing for ACW
+
+		LCD_String(buffer);    // Show direction and speed percentage
+		_delay_ms(500);        // Wait 500ms between speed updates
+	}
+
+	// ----- Speed Decreasing Loop -----
+	for(i = 255; i >= 0; i -= 26)  // Decrease PWM duty cycle in steps
+	{
+		OCR0 = i;  // Set PWM duty cycle
+
+		if (dir_flag == 0) // CLOCKWISE
+		{
+			PORTB |= (1 << PB3);   // IN1 = PWM
+			PORTB &= ~(1 << PB4);  // IN2 = LOW
+		}
+		else // ANTICLOCKWISE
+		{
+			PORTB &= ~(1 << PB3);  // IN1 = LOW
+			PORTB |= (1 << PB4);   // IN2 = PWM
+		}
+
+		LCD_Command(0x01);     // Clear LCD
+		_delay_ms(2);
+		LCD_Command(0x80);     // First line
+		LCD_String("Sohan Fulzele");
+
+		LCD_Command(0xC0);     // Second line
+
+		// Display speed based on direction
+		if (dir_flag == 0)
+		sprintf(buffer, "%s %d%%", direction, (i * 100) / 255); // Decreasing for CW
+		else
+		sprintf(buffer, "%s %d%%", direction, 100 - (i * 100) / 255); // Increasing for ACW
+
+		LCD_String(buffer);    // Show direction and speed
+		_delay_ms(500);        // Delay for visibility
+	}
+}
+
+int main(void)
+{
+	// Set PB3 and PB4 as output (motor control pins)
+	DDRB |= (1 << PB3) | (1 << PB4);
+
+	LCD_Init(); // Initialize the LCD
+
+	// Configure Timer0 for Fast PWM Mode
+	TCCR0 = (1 << WGM00) | (1 << WGM01) |  // Fast PWM mode
+	(1 << COM01) |               // Clear OC0 on compare match (non-inverting mode)
+	(1 << CS01) | (1 << CS00);   // Prescaler = 64
+
+	while (1)
+	{
+		motorcontrol("CLOCKWISE", 0);     // Run motor clockwise with speed ramp up/down
+		_delay_ms(1000);                  // Wait 1 second
+
+		motorcontrol("ANTICLOCKWISE", 1); // Run motor anticlockwise with speed ramp up/down
+		_delay_ms(1000);                  // Wait 1 second
+	}
+}
+
+//header file
+// Define LCD port and pin connections
+#define LCD_Data_Dir DDRC // LCD data port direction
+#define LCD_Command_Dir DDRD // LCD command port direction
+#define LCD_Data_Port PORTC // LCD data port
+#define LCD_Command_Port PORTD // LCD command port
+#define RS PD7 // Register select pin
+#define RW PD6 // Read/write pin
+#define EN PD5 // Enable pin
+
+// Function prototypes
+void LCD_Command(unsigned char cmnd); // Send command to LCD
+void LCD_Char(unsigned char char_data); // Display a single character
+void LCD_String(char *str); // Display a string
+void LCD_Init(void); // Initialize LCD
+
+// LCD Initialization function
+void LCD_Init(void)
+{
+	LCD_Command_Dir = 0xFF; // Set all command port pins as output
+	LCD_Data_Dir = 0xFF; // Set all data port pins as output
+	_delay_ms(20); // LCD power-on delay
+	LCD_Command(0x38); // 8-bit mode, 2-line display, 5x7 font
+	LCD_Command(0x0C); // Display ON, Cursor OFF
+	LCD_Command(0x06); // Auto increment cursor
+	LCD_Command(0x01); // Clear display screen
+	_delay_ms(20); // Wait for commands to execute
+	LCD_Command(0x80); // Move cursor to the beginning
+}
+
+// Function to send a command to LCD
+void LCD_Command(unsigned char cmnd)
+{
+	LCD_Data_Port = cmnd; // Load command to data port
+	LCD_Command_Port &= ~(1 << RS); // RS = 0 for command mode
+	
+	
+	LCD_Command_Port &= ~(1 << RW); // RW = 0 for write mode
+	LCD_Command_Port |= (1 << EN); // Generate a high-to-low pulse on EN pin
+	_delay_ms(1);
+	LCD_Command_Port &= ~(1 << EN); // Clear enable pin
+	_delay_ms(2); // Wait for LCD to process
+}
+
+// Function to display a single character on LCD
+void LCD_Char(unsigned char char_data)
+{
+	LCD_Data_Port = char_data; // Load character to data port
+	LCD_Command_Port |= (1 << RS); // RS = 1 for data mode
+	LCD_Command_Port &= ~(1 << RW); // RW = 0 for write mode
+	LCD_Command_Port |= (1 << EN); // Generate a high-to-low pulse on EN pin
+	_delay_ms(1);
+	LCD_Command_Port &= ~(1 << EN); // Clear enable pin
+	_delay_ms(2); // Wait for LCD to process
+}
+// Function to display a string on LCD
+void LCD_String(char *str)
+{
+	int i;
+	for (i = 0; str[i] != 0; i++) // Loop through each character
+	{
+		LCD_Char(str[i]); // Send character to LCD
+	}
+}
