@@ -2,7 +2,7 @@
 1. Start
 2. Initialize Microcontroller
 • Configure PB3 (OC0) as an output pin.
-4
+
 • Set up TIMER0 in Fast PWM mode with a prescaler of 64.
 • Enable Non-inverting PWM mode for speed control.
 3. Set Initial Motor Speed
@@ -58,7 +58,7 @@ void motorcontrol(char* direction, uint8_t dir_flag)
 		LCD_Command(0x01);     // Clear LCD
 		_delay_ms(2);
 		LCD_Command(0x80);     // Move cursor to first line
-		LCD_String("Sohan Fulzele");
+		LCD_String("SDRFTVGYB");
 
 		LCD_Command(0xC0);     // Move cursor to second line
 
