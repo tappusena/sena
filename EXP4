@@ -1,0 +1,167 @@
+
+ALGORITHM (For Transmitting Single character)
+1. Start
+2. Initialize serial communication in mode 1 or mode 3 operation (SCON =50H
+or 0D8H)
+3. Initialize timer 1 in auto reload mode (mode 2 ) to generate baud rate (TMOD
+=20H)
+4. Initialize TH1 register for different baud rate For example: For 9600 baud
+rate load -3 or 0fdh in th1
+For 4800 baud rate load -6 or 0fAh in th1
+For 2400 baud rate load -12 or 0f4h in th1
+5. Start timer 1
+6. Take the character in Accumulator for sending it serially
+7. Call transmit subroutine
+8. Repeat the procedure for sending different character from step 6 and 7 .
+9. Repeat it for continuous operation from step 6
+10. Stop
+Algorithm (Subroutine for Transmit):
+11. Take the character from Accumulator to SBUF register for transmitting seri-
+ally
+12. Monitor TI flag, that all the bits are transfer or not
+13. Flash the LED’s for every one second continuously
+14. If transfer TI bit becomes set, to transfer another byte clear TI bit
+15. Return to main program
+
+
+
+; EXP 4A(1): TO TRANSMIT DATA using single character
+
+org 0000h
+    mov scon,#50h        ; Configure serial control register for mode 1 (8-bit UART)
+    mov tmod,#20h        ; Timer1 in mode 2 (8-bit auto-reload) for baud rate generation
+    mov th1,#-3         ; Load TH1 to set baud rate (9600 baud for 11.0592 MHz crystal)
+
+    setb tr1            ; Start Timer1 to generate baud rate
+
+l1: mov a,#'W'         ; Load character 'W' into accumulator
+    acall trans        ; Call transmission subroutine
+    mov a,#'E'         ; Load character 'E'
+    acall trans        ; Call transmission subroutine
+    mov a,#'L'         ; Load character 'L'
+    acall trans        ; Call transmission subroutine
+    mov a,#'C'         ; Load character 'C'
+    acall trans        ; Call transmission subroutine
+    mov a,#'O'         ; Load character 'O'
+    acall trans        ; Call transmission subroutine
+    mov a,#'M'         ; Load character 'M'
+    acall trans        ; Call transmission subroutine
+    mov a,#'E'         ; Load character 'E'
+    acall trans        ; Call transmission subroutine
+    mov a,#' '         ; Load space character
+    acall trans        ; Call transmission subroutine
+    mov a,#'T'         ; Load character 'T'
+    acall trans        ; Call transmission subroutine
+    mov a,#'O'         ; Load character 'O'
+    acall trans        ; Call transmission subroutine
+    mov a,#' '         ; Load space character
+    acall trans        ; Call transmission subroutine
+    mov a,#'V'         ; Load character 'V'
+    acall trans        ; Call transmission subroutine
+    mov a,#'I'         ; Load character 'I'
+    acall trans        ; Call transmission subroutine
+    mov a,#'I'         ; Load character 'I' again
+    acall trans        ; Call transmission subroutine
+    mov a,#'T'         ; Load character 'T'
+    acall trans        ; Call transmission subroutine
+    mov a,#0x0a        ; Load newline character (LF)
+    acall trans        ; Call transmission subroutine
+    mov a,#0x0d        ; Load carriage return (CR)
+    acall trans        ; Call transmission subroutine
+    sjmp l1            ; Repeat indefinitely
+   
+trans:
+    mov sbuf,a         ; Move character from accumulator to serial buffer for transmission
+    jnb ti,$           ; Wait until transmission is complete (TI flag set)
+    clr ti             ; Clear TI flag for next transmission
+    ret                ; Return from subroutine
+
+end
+
+ALGORITHM (Using string)
+1. Start
+2. Initialize serial communication in mode 1 or mode 3 operation (SCON =50H
+or 0D8H)
+3. Initialize timer 1 in auto reload mode (mode 2 ) to generate baud rate (TMOD
+=20H)
+4. Initialize TH1 register for different baud rate
+4
+5. Start timer 1
+6. For using string at specific address we have to initialize DPTR
+7. Clear R0 register for generating string address
+8. Shift data in R0 to A
+9. Generate address of program memory where string is stored and take it in
+Accumulator (Use MOVC A,@A+DPTR)
+10. Take the character from Accumulator to SBUF register for transmitting seri-
+ally
+11. Monitor TI flag, that all the bits are transfer or not
+12. If transfer TI bit becomes set, to transfer another byte clear TI bit
+13. Increment R0 for next character from the string
+14. Compare the data in R0 with the length of string if string is not completed go
+to step 8.
+15. To display string continuously repeat procedure from step 6.
+16. Stop
+
+; EXP 4A(2): TO TRANSMIT DATA using string (MOVC instruction)
+
+
+org 0000h
+    mov scon,#50h        ; Configure serial control register for mode 1 (8-bit UART)
+    mov tmod,#20h        ; Timer1 in mode 2 (8-bit auto-reload) for baud rate generation
+    mov th1,#-3         ; Load TH1 to set baud rate (9600 baud for 11.0592 MHz crystal)
+
+    setb tr1            ; Start Timer1 to generate baud rate
+
+l2: mov dptr,#mess     ; Load data pointer with the address of message string
+
+l1: clr a              ; Clear accumulator before fetching character
+    movc a,@a+dptr     ; Fetch character from the message using MOVC instruction
+    jz l2              ; If null terminator (0) is encountered, restart transmission
+    mov sbuf,a         ; Move character to serial buffer for transmission
+    jnb ti,$           ; Wait until transmission is complete (TI flag set)
+    clr ti             ; Clear TI flag for next transmission
+    inc dptr           ; Increment data pointer to fetch next character
+    sjmp l1            ; Repeat until null character is reached
+
+org 0300h
+mess:
+    db 'WELCOME TO VIIT',0x0a,0x0d  ; First message with newline and carriage return
+    db 'WELCOME TO E AND TC',0x0a,0x0d  ; Second message
+    db 'NAME: Ayush Sonawane',0x0a,0x0d  ; Third message
+    db 'PRN NO.: 22310077',0x0a,0x0d,0  ; Fourth message with null terminator to end
+
+end
+
+
+ALGORITHM (For receiving)
+1. Start
+2. Initialize serial communication in mode 1 or mode 3 operation (SCON =50H
+or 0D8H)
+3. Initialize timer 1 in auto reload mode (mode 2 ) to generate baud rate (TMOD
+=20H)
+4. Initialize TH1 register for different baud rate
+5. Start timer 1
+6. Monitor RI flag
+7. If RI is 1, SBUF have receiver Byte ( 8 Bits), Get it in Accumulator
+5
+8. Transfer it to port 1 for display.
+9. Clear RI flag for receiving next byte
+10. Jump to step 7 for repeating operation.
+11. Stop.
+
+; EXP 4B: TO RECEIVE DATA
+
+org 0000h
+    mov scon,#50h        ; Configure serial control register for mode 1 (8-bit UART)
+    mov tmod,#20h        ; Timer1 in mode 2 (8-bit auto-reload) for baud rate generation
+    mov th1,#-3         ; Load TH1 to set baud rate (9600 baud for 11.0592 MHz crystal)
+
+l1: setb tr1            ; Start Timer1 to enable serial communication
+    
+    jnb ri,$            ; Wait until a character is received (RI flag set)
+    mov a,sbuf          ; Move received data from serial buffer (SBUF) to accumulator
+    mov p1,a            ; Store received data in Port 1 (P1)
+    clr ri              ; Clear RI flag for next reception
+    sjmp l1             ; Repeat indefinitely to receive more data
+
+end
