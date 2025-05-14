@@ -1,0 +1,65 @@
+//Algorithm
+/*ALGORITHM
+1. Start
+2. Define Port pins connected to LEDs, Relay, Buzzer, Switch S1.
+3. Initialize port pins as input port where switches are connected
+4. Read the status of SW switch
+5. If S1 is pressed/closed (SW=0) then goto case 1 else continue
+6. If S1 is released/open (SW=1) then goto case 2 else continue
+7. Jump to step 3
+Case 1:
+8. Turn OFF Relay
+9. Turn OFF Buzzer
+10. Flash the LED’s for every one second continuously
+11. Return to main program
+Case 2:
+12. Turn ON Relay
+13. Turn ON Buzzer
+14. Flash LED’s alternate
+15. Return to main program
+*/
+
+;EXPT 2: TO INTERFACE SWITCHES, LED'S , RELAY AND BUZZER WITH 89S52 MICROCONTROLLER
+;NAME: SOHAN ANAND FULZELE
+;ROLL NO.: 211001
+;GR NO.: 22310010
+;DOP:14/02/2025
+
+led equ p0 ;Define LED at Port 0
+sw equ p1.0 ;Define Switch at P1.0
+relay equ p1.1 ;Define Relay at P1.1
+buzz equ p1.2 ;Define Buzzer at P1.2
+
+ org 0000H ;Start of program memory
+
+
+start:
+ JB sw, case1 ;Jump to case1 if switch is HIGH (pressed)
+
+clr relay ;Turn Off relay
+ clr buzz ;Turn OFF buzzer
+ mov led, #0FFH ;Set LED pattern 11111111 (All LEDs ON)
+acall delay ;Call delay subroutine
+mov led, #00H ;Set LED pattern 00000000 (All LEDs OFF)
+ acall delay ;Call delay subroutine
+ sjmp start ; Repeat the loop
+
+ case1:
+ setb relay ;Turn ON relay
+ setb buzz ;Turn ON buzzer
+ mov led, #0AAH ;Set LED pattern 10101010 (Alternating LEDs ON)
+ acall delay ;Call delay subroutine
+ mov led, #55H ;Set LED pattern 01010101 (Opposite alternating LEDs ON)
+ acall delay ;Call delay subroutine
+ sjmp start ;Return to start
+
+ delay: ;Delay of 1 sec
+ mov r2, #18 ;Outer loop count
+ l3: mov r1, #100 ;Middle loop count
+ l2: mov r0, #250 ;Inner loop count
+ l1: djnz r0, l1 ;Decrement r0 until 0
+ djnz r1, l2 ;Decrement r1 until 0
+ djnz r2, l3 ;Decrement r2 until 0
+ ret ;Return from subroutine
+
+ end
