@@ -104,19 +104,19 @@ ACALL DISPLAY
 MOV A,#':'
 ACALL DISPLAY
 MOV A,#' ' ; SpaceACALL DISPLAY
-MOV A,#'P'
+MOV A,#'A'
 ACALL DISPLAY
 MOV A,#'R'
 ACALL DISPLAY
-MOV A,#'A'
+MOV A,#'C'
 ACALL DISPLAY
 MOV A,#'N'
 ACALL DISPLAY
-MOV A,#'E'
+MOV A,#'K'
 ACALL DISPLAY
-MOV A,#'S'
+MOV A,#'J'
 ACALL DISPLAY
-MOV A,#'H'
+MOV A,#'M'
 
 ; Move to second line
 MOV A,#0C0H ; Move cursor to beginning of second line
@@ -139,13 +139,13 @@ MOV A,#'2' ; Display roll number
 ACALL DISPLAY
 MOV A,#'1'
 ACALL DISPLAY
-MOV A,#'2'
+MOV A,#'5'
 ACALL DISPLAY
 MOV A,#'0'
 ACALL DISPLAY
-MOV A,#'6'
+MOV A,#'9'
 ACALL DISPLAY
-MOV A,#'3'
+MOV A,#'7'
 ACALL DISPLAY
 
 ; Command execution routine
@@ -271,7 +271,7 @@ L3: DJNZ R5, L3
 
     ; Data stored in code memory
     ORG 0300H
-MSG1: DB 'NAME: PRANESH', 0  ; Null-terminated string
-MSG2: DB 'PRN NO.:22311733', 0  ; Null-terminated string
+MSG1: DB 'NAME: ABHJDBF', 0  ; Null-terminated string
+MSG2: DB 'PRN NO.:5345344', 0  ; Null-terminated string
 
     END
